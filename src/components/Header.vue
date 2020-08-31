@@ -11,7 +11,7 @@
           <li><a href="/support"><i class="fas fa-headset"></i> Support</a></li>
           <li><a href="/legal"><i class="fas fa-file-contract"></i> Legal</a></li>
           <li><a href="/login" v-if="!authenticated"><i class="fab fa-keycdn"></i> Login</a></li>
-          <li><a class="user-tag" v-if="authenticated" v-html="`${username}#${discriminator}`"></a></li>
+          <li><a class="user-tag" v-if="authenticated" v-html="`${username}`"></a></li>
         </ul>
       </header>
     </section>
@@ -22,7 +22,7 @@ import { mapGetters,mapActions } from "vuex";
 
 export default {
   name: "Header",
-  computed: mapGetters(["authenticated", "username", "discriminator"]),
+  computed: mapGetters(["authenticated", "username"]),
   methods: {
     toggleMenu() {
       var bars = this.$refs.bars;

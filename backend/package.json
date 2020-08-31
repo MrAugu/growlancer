@@ -1,0 +1,28 @@
+{
+  "name": "growlancer",
+  "version": "1.0.0",
+  "description": "GrowLancer backend.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrAugu/growlancer.git"
+  },
+  "author": "MrAugu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MrAugu/growlancer/issues"
+  },
+  "homepage": "https://github.com/MrAugu/growlancer#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "connect-mongo": "^3.2.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "growstocks-wrapper": "^1.0.0",
+    "helmet": "^4.1.0",
+    "mongoose": "^5.10.2"
+  }
+}
