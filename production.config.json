@@ -1,0 +1,6 @@
+{
+  "apiBase": "https://modcord.xyz/api",
+  "cdnUrl": "https://cdn.modcord.xyz/",
+  "botId": "678360943863922688",
+  "callbackURL": "https://modcord.xyz/callback"
+}
