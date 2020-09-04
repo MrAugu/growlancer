@@ -2,22 +2,20 @@ import axios from "axios"
 import { apiBase } from "../../../conf.json";
 
 const state = {
-  accessToken: "",
-  guilds: [],
-  priviledgedGuilds: [],
+  token: "",
   username: "",
   discriminator: "",
   id: "",
+  growid: "",
   loggedIn: false
 };
 
 const getters = {
   allGuilds: () => state.guilds,
-  allPriviledgedGuilds: () => state.priviledgedGuilds,
-  token: () => state.accessToken,
+  token: () => state.token,
   username: () => state.username,
-  discriminator: () => state.discriminator,
   id: () => state.id,
+  growid: () => state.growid,
   authenticated: () => state.loggedIn
 };
 
@@ -26,7 +24,7 @@ const actions = {
     commit("setToken", token);
   },
   async fetchUserData ({ commit }) {
-    axios.get(`${apiBase}/v1/fetch/${state.accessToken}`).then(response => {
+    axios.get(`${apiBase}/v1/fetch/${state.id}`).then(response => {
       commit("setFreshFetchedData", response);
     }).catch(e => console.error(e));
   },
@@ -41,17 +39,14 @@ const mutations = {
     state.discriminator = data.discriminator;
     state.username = data.username;
     state.id = data.id;
-    state.guilds = data.guilds;
-    state.priviledgedGuilds = data.priviledgedGuilds;
+    state.growid = data.growid;
     state.loggedIn = true;
   },
   setFreshFetchedData: (state, data) => {
     data = data.data;
-    state.discriminator = data.discriminator;
     state.username = data.username;
     state.id = data.id;
-    state.guilds = data.guilds;
-    state.priviledgedGuilds = data.priviledgedGuilds;
+    state.growid = data.growid;
     state.loggedIn = true;
     if (localStorage.getItem("session-data")) localStorage.removeItem("session-data");
     if (localStorage.getItem("expires-in")) localStorage.removeItem("expires-in");
