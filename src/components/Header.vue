@@ -2,23 +2,20 @@
     <section>
       <header>
         <title>{{ title }}</title>
-        <a href="/" class="logo">Mod<span class="outline-text">Cord</span></a>
+        <a href="/" class="logo">Grow<span class="outline-text">Lancer</span></a>
         <a class="bars" ref="bars" @click="toggleMenu()"><i class="fas fa-bars"></i></a>
         <ul ref="nav" class="display-fix">
           <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
-          <li><a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-          <li><a href="/commands"><i class="fas fa-terminal"></i> Commands</a></li>
-          <li><a href="/support"><i class="fas fa-headset"></i> Support</a></li>
+          <li><a href="/support"><i class="fas fa-headset"></i> Help</a></li>
           <li><a href="/legal"><i class="fas fa-file-contract"></i> Legal</a></li>
-          <li><a href="/login" v-if="!authenticated"><i class="fab fa-keycdn"></i> Login</a></li>
-          <li><a class="user-tag" v-if="authenticated" v-html="`${username}`"></a></li>
+          
         </ul>
       </header>
     </section>
 </template>
 
 <script>
-import { mapGetters,mapActions } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "Header",
@@ -49,7 +46,7 @@ export default {
     const parameters = new URLSearchParams(URL);
     if (parameters.get("auth") && parameters.get("auth") === "ok") {
       this.setToken(parameters.get("token"));
-      localStorage.setItem("expires-in", (Date.now() + 1000 * 60 * 60 * 72));
+      localStorage.setItem("expires-in", (Date.now() + 1000 * 60 * 60 * 72 * 30));
       if (!this.authenticated) this.fetchUserData();
     } else {
       var session = localStorage.getItem("session-data");

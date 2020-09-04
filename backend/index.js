@@ -8,12 +8,20 @@ const config = require("./config");
 const bodyParser = require("body-parser");
 const { GrowStocksClient } = require("growstocks-wrapper");
 const AuthenticationRoutes = require("./routers/authentication");
+const StaticRoutes = require("./routers/static");
+const passport = require("passport");
+const ApiRoutes = require("./routers/api");
+
+mongoose.connect(config.db.url, {
+  useUnifiedTopology: true,
+  useNewUrlParser: true
+});
 
 class Website {
   constructor (options = {}) {
     this.port = options.port || 3030;
     this.app = express();
-    this.log = console;
+    this.log = console.log;
     this.growstocks = new GrowStocksClient({
       organisation: config.growstocks.organisation,
       url: config.growstocks.url,
@@ -32,15 +40,29 @@ class Website {
 
   async loadMiddleware () {
     this.log("- Loading up middlewares...");
+    this.app.set("view engine", "html");
+
     this.log("Loading mongodb session store.");
     this.app.use(session({
       store: new MongoStore({
         mongooseConnection: mongoose.connection
       }),
-      secret: config.dashboard.sessionSecret,
+      secret: config.website.sessionSecret,
       resave: true,
       saveUninitialized: true
     }));
+
+    this.log("Loding passport.");
+    this.app.use(passport.initialize());
+    this.app.use(passport.session());
+
+    passport.serializeUser((user, done) => {
+      done(null, user);
+    });
+       
+    passport.deserializeUser((user, done) => {
+      done(null, user);
+    });
 
     this.log("Loading helmet.");
     this.app.use(helmet());
@@ -57,12 +79,26 @@ class Website {
   async loadRoutes () {
     this.log("- Loading routes.");
 
+    this.log("Loading the css & js static assets.");
+    this.app.use("/css", express.static(path.resolve(`${this.root}${path.sep}dist${path.sep}css`)));
+    this.app.use("/js", express.static(path.resolve(`${this.root}${path.sep}dist${path.sep}js`)));
+
     this.log("Registering authentication routes.");
     this.register(AuthenticationRoutes);
+
+    this.log("Registering static routes.");
+    this.register(StaticRoutes);
+
+    this.log("Registering api routes.");
+    this.register(ApiRoutes);
   }
 
   register (Router) {
     return new Router(this);
+  }
+
+  render (response) {
+    return response.sendFile(`${this.root}${path.sep}dist${path.sep}index.html`);
   }
 
   startUp () {

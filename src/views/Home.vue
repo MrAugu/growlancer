@@ -6,7 +6,7 @@
       <!-- -->
     </div>
     <Cookie />
-    <Footer />
+    <!-- <Footer /> -->
   </div>
 </template>
 
@@ -14,18 +14,16 @@
 // @ is an alias to /src
 import Header from "@/components/Header.vue";
 import Cookie from "@/components/Cookie.vue";
-import Footer from "@/components/Footer.vue";
 
 export default {
   name: "Home",
   components: {
     Header,
-    Cookie,
-    Footer
+    Cookie
   },
   data () {
     return {
-      guildCount: "#"
+      nothing: true
     }
   },
   methods: {

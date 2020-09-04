@@ -11,7 +11,6 @@ const state = {
 };
 
 const getters = {
-  allGuilds: () => state.guilds,
   token: () => state.token,
   username: () => state.username,
   id: () => state.id,
@@ -24,7 +23,7 @@ const actions = {
     commit("setToken", token);
   },
   async fetchUserData ({ commit }) {
-    axios.get(`${apiBase}/v1/fetch/${state.id}`).then(response => {
+    axios.get(`${apiBase}/fetch/${state.token}`).then(response => {
       commit("setFreshFetchedData", response);
     }).catch(e => console.error(e));
   },
@@ -34,9 +33,9 @@ const actions = {
 };
 
 const mutations = {
-  setToken: (state, token) => (state.accessToken = token),
+  setToken: (state, token) => (state.token = token),
   setFetchedData: (state, data) => {
-    state.discriminator = data.discriminator;
+    if (data.error) return;
     state.username = data.username;
     state.id = data.id;
     state.growid = data.growid;
@@ -44,6 +43,7 @@ const mutations = {
   },
   setFreshFetchedData: (state, data) => {
     data = data.data;
+    if (data.error) return;
     state.username = data.username;
     state.id = data.id;
     state.growid = data.growid;
@@ -52,7 +52,7 @@ const mutations = {
     if (localStorage.getItem("expires-in")) localStorage.removeItem("expires-in");
 
     localStorage.setItem("session-data", JSON.stringify(data));
-    localStorage.setItem("expires-in", (Date.now() + 1000 * 60 * 60 * 72));
+    localStorage.setItem("expires-in", (Date.now() + 1000 * 60 * 60 * 72 * 30));
   }
 };
 
