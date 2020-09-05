@@ -98,6 +98,7 @@ class Website {
   }
 
   render (response) {
+      response.setHeader("Content-Security-Policy", "script-src-elem 'sha256-69yBXxcA8LFq+zevdTXMbjDf7OANHHaGzC638tPv1NU=' https://unpkg.com 'unsafe-inline' *; script-src 'unsafe-inline' 'sha256-69yBXxcA8LFq+zevdTXMbjDf7OANHHaGzC638tPv1NU=' https://unpkg.com 'self' *; ");
     return response.sendFile(`${this.root}${path.sep}dist${path.sep}index.html`);
   }
 
