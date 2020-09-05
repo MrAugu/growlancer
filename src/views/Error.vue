@@ -1,6 +1,6 @@
 <template>
   <section>
-    <Header v-bind:title="title"/>
+    <Header v-bind:title="title" />
     <div class="home-center">
       <h1 class="error-title">{{ code }}</h1>
       <h3 class="error-message">{{ message }}</h3>

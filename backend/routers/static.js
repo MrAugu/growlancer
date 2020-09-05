@@ -3,6 +3,10 @@ class StaticRoutes {
     website.app.get("/", (request, response) => { // eslint-disable-line no-unused-vars
       website.render(response);
     });
+
+    website.app.get("/account", website.authenticate, (request, response) => { // eslint-disable-line no-unused-vars
+      website.render(response);
+    });
   }
 }
 

@@ -16,6 +16,11 @@ Vue.use(VueRouter)
     component: () => import("../views/Legal.vue")
   },
   {
+    path: "/account",
+    name: "Account",
+    component: () => import("../views/Account.vue")
+  },
+  {
     path: "*",
     name: "Error",
     component: () => import("../views/Error.vue")

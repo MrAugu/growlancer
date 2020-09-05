@@ -1,3 +1,5 @@
+const User = require("../models/user");
+
 class AuthenticationRoutes {
   constructor (website) {
     website.app.get("/login", (request, response) => {
@@ -10,6 +12,25 @@ class AuthenticationRoutes {
 
       const user = await website.growstocks.exchangeAuthToken(code);
       if (user.error) return response.redirect("/");
+
+      const dbUser = await User.findOne({
+        id: user.id
+      });
+
+      if (!dbUser) {
+        const newUser = new User({
+          id: user.id,
+          username: user.name,
+          growid: user.growid ? user.growid : null,
+          joined: Date.now(),
+          token: user.token
+        });
+        await newUser.save().catch(() => {});
+      } else {
+        dbUser.username = user.name;
+        dbUser.growid = user.growid ? user.growid : null;
+        await dbUser.save().catch(() => {});
+      }
 
       const obj = JSON.parse(JSON.stringify(user));
       obj.token = code;
