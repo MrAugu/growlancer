@@ -7,6 +7,10 @@ const userSchema = new Schema({
   username: {
     type: String
   },
+  growid: {
+    type: String,
+    default: null
+  },
   joined: {
     type: Number
   },
@@ -33,6 +37,13 @@ const userSchema = new Schema({
   discord: {
     type: String,
     default: null
+  },
+  token: {
+    type: String
+  },
+  badges: {
+    type: Array,
+    default: []
   }
 });
 
