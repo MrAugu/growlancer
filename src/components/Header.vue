@@ -7,6 +7,8 @@
         <ul ref="nav" class="display-fix">
           <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
           <li><a href="/support"><i class="fas fa-headset"></i> Help</a></li>
+          <li><a href="/services"><i class="fas fa-tachometer-alt"></i> Services</a></li>
+          <li><a href="/account" v-if="authenticated"><i class="fas fa-user-circle"></i> Account</a></li>
           <li><a href="/legal"><i class="fas fa-file-contract"></i> Legal</a></li>
           <li><a href="/login" v-if="!authenticated"><i class="fab fa-keycdn"></i> Login</a></li>
           <li><a class="user-tag" v-if="authenticated" v-html="`${username}`"></a></li>
