@@ -17,7 +17,7 @@
         <label for="service-banner" v-html="serviceBannerInputText" class="form-field-file-input-label"></label>
       </div>
       <div class="form-field">
-        <p class="form-field-title"><span v-html="check(title.length > 10, input > 0)"></span> Service Title ({{ 40 - title.length }} Characters Left)</p>
+        <p class="form-field-title"><span v-html="check(title.length > 9, title.length > 0)"></span> Service Title ({{ 40 - title.length }} Characters Left)</p>
         <p class="form-field-title-description">The title of your service, maximum 45 characters long.</p>
         <input type="text" maxlength="40" v-model="title" class="form-field-text-input" placeholder="Music Translation Service" required>
       </div>
