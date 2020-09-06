@@ -1169,4 +1169,33 @@ export default {
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: #446fff;
   }
+
+  .form-field-file-input {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+  }
+
+  .form-field-file-input + .form-field-file-input-label {
+    width: 100%;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 0.50em 0.60em;
+    color: #ffffff;
+    border: solid 1px #3b3b3d;
+    border-radius: 3px;
+    cursor: pointer;
+    display: block;
+  }
+
+  .form-field-file-input + .form-field-file-input-label * {
+    pointer-events: none;
+  }
+
+  .form-field-file-input + .form-field-file-input-label:focus, .form-field-file-input + .form-field-file-input-label:hover {
+    border-color: #446fff;
+  }
 </style>
