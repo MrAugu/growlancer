@@ -172,7 +172,7 @@ export default {
     min-height: 120px;
     width: 100%;
     height: 120px;
-    background-color: #16151d;
+    background-color: rgba(0, 0, 0, 0.1);
     border: 1px solid #49474d;
     border-radius: 3px;
     color: #ffffff;
@@ -916,6 +916,40 @@ export default {
     transition: 0.5s;
   }
 
+  .tier-wrapper {
+    text-align: center;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    flex-direction: column;
+    transition: 0.5s;
+  }
+
+  .tier-card {
+    position: relative;
+    overflow: hidden;
+    height: 683px;
+    padding: 0.8em;
+    width: 20em;
+    text-align: left;
+    background-color: #26212c;
+    height: auto;
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 1em;
+    word-break: break-word!important;
+    transition: 0.5s;
+    -webkit-box-shadow: 10px 10px 16px -5px rgba(0, 0, 0, 0.46);
+    -moz-box-shadow: 10px 10px 16px -5px rgba(0, 0, 0, 0.46);
+    box-shadow: 10px 10px 16px -5px rgba(0, 0, 0, 0.46);
+    transform: translateY(150px);
+    opacity: 0;
+    animation: come-in 0.6s ease forwards;
+  }
+
   .feature-card {
     position: relative;
     overflow: hidden;
@@ -937,7 +971,6 @@ export default {
     transform: translateY(150px);
     opacity: 0;
     animation: come-in 0.6s ease forwards;
-    
   }
 
   .feature-card:nth-child(1) {animation-delay: 0.0s; }
@@ -989,6 +1022,13 @@ export default {
 
   @media screen and (min-width: 770px) {
     .feature-container {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .tier-wrapper {
       flex-direction: row;
       flex-wrap: wrap;
       justify-content: center;
@@ -1197,5 +1237,9 @@ export default {
 
   .form-field-file-input + .form-field-file-input-label:focus, .form-field-file-input + .form-field-file-input-label:hover {
     border-color: #446fff;
+  }
+
+  .add-tier:hover {
+    color: rgb(170, 170, 170);
   }
 </style>

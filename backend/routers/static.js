@@ -7,6 +7,10 @@ class StaticRoutes {
     website.app.get("/account", website.authenticate, (request, response) => { // eslint-disable-line no-unused-vars
       website.render(response);
     });
+
+    website.app.get("/services/new", website.authenticate, (request, response) => { // eslint-disable-line no-unused-vars
+      website.render(response);
+    });
   }
 }
 

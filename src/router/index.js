@@ -21,6 +21,11 @@ Vue.use(VueRouter)
     component: () => import("../views/Account.vue")
   },
   {
+    path: "/services/new",
+    name: "NewService",
+    component: () => import("../views/NewService.vue")
+  },
+  {
     path: "*",
     name: "Error",
     component: () => import("../views/Error.vue")
