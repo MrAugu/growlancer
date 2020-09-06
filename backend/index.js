@@ -11,6 +11,7 @@ const AuthenticationRoutes = require("./routers/authentication");
 const StaticRoutes = require("./routers/static");
 const passport = require("passport");
 const ApiRoutes = require("./routers/api");
+const CdnRoutes = require("./routers/cdn");
 
 mongoose.connect(config.db.url, {
   useUnifiedTopology: true,
@@ -91,6 +92,9 @@ class Website {
 
     this.log("Registering api routes.");
     this.register(ApiRoutes);
+
+    this.log("Registering cdn routes.");
+    this.register(CdnRoutes);
   }
 
   register (Router) {
