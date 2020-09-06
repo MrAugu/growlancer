@@ -6,18 +6,19 @@
     <form class="form" v-if="loaded">
       <div class="form-field">
         <p class="form-field-title">Avatar</p>
-        <img v-if="loaded && data.avatar" v-bind:src="avatarURL" style="margin-top: 0.5em; margin-bottom: 0.5em; border-radius: 50%; height: 50px; width: 50px;">
+        <img v-if="loaded && data.avatar" v-bind:src="avatarURL" style="margin-top: 0.5em; margin-bottom: 0.2em; border-radius: 50%; height: 75px; width: 75px;">
         <p class="form-field-title-description">Your profile picture which will slow on the website publically, max size 3 megabyte.</p>
         <input type="file" class="form-field-file-input" @change="avatarUpdate" ref="avatar" id="avatar-file">
         <label for="avatar-file" v-html="avatarInputText" class="form-field-file-input-label"></label>
       </div>
       <div class="form-field">
-        <p class="form-field-title">Bio</p>
+        <p class="form-field-title">Bio ({{ 100 - bio.length }} Characters Left)</p>
         <p class="form-field-title-description">A text of maxim 100 characters birefly describing you.</p>
-        <textarea class="form-field-textarea" @input="update()" v-model="bio" placeholder="I'm a mysterious person."></textarea>
+        <textarea class="form-field-textarea" maxlength="100" @input="update()" v-model="bio" placeholder="I'm a mysterious person."></textarea>
       </div>
       <div class="form-field">
         <p class="form-field-title">Banner</p>
+        <img v-if="loaded && data.banner" v-bind:src="bannerURL" style="margin-top: 0.5em; margin-bottom: 0.2em; height: 7em; width: 50%; display: block;">
         <p class="form-field-title-description">Your profile banner which will slow on your profile publically, max size 5 megabytes.</p>
         <input type="file" class="form-field-file-input" @change="bannerUpdate" ref="banner" id="banner-file">
         <label for="banner-file" v-html="bannerInputText" class="form-field-file-input-label"></label>
@@ -77,8 +78,10 @@ export default {
       this.avatarInputText = `<i class='fas fa-image'></i> Choose a${this.data.avatar ? " new" : ""} profile picture`;
       this.bannerInputText = `<i class='fas fa-image'></i> Choose a${this.data.banner ? " new" : ""} banner picture`;
       this.avatarURL = `${this.$apiBase.split("/").slice(0, 3).join("/")}/cdn/avatars/${this.data.avatar}`;
+      this.bannerURL = `${this.$apiBase.split("/").slice(0, 3).join("/")}/cdn/banners/${this.data.banner}`;
     },
     update: function () {
+      this.bio = this.bio.replace(/ {2}/g, " ");
       if (this.bio !== this.data.bio || this.avatarInputValue !== null || this.bannerInputValue !== null) {
         this.changed = true;
       } else {

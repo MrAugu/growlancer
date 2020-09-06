@@ -108,7 +108,7 @@ class ApiRoutes {
         }
       }
 
-      user.bio = bio;
+      user.bio = bio.trim().slice(0, 100);
       if (banner) user.banner = banner;
       if (avatar) user.avatar = avatar;
 
