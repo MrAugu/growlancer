@@ -5,19 +5,19 @@
     <h1 class="head-title-underline" v-if="loaded"><i class="fas fa-info-plus icon"></i> New Service</h1>
     <form class="form" v-if="loaded">
       <div class="form-field">
-        <p class="form-field-title">Service Card Banner</p>
+        <p class="form-field-title"><span v-html="check(!!cardBannerInputValue)"></span> Service Card Banner</p>
         <p class="form-field-title-description">A smaller banner that will be shown on the service card as a listing, max size 4 megabyte.</p>
         <input type="file" class="form-field-file-input" @change="cardBannerUpdate" ref="cardbanner" id="card-banner">
         <label for="card-banner" v-html="cardBannerInputText" class="form-field-file-input-label"></label>
       </div>
       <div class="form-field">
-        <p class="form-field-title">Service Banner</p>
+        <p class="form-field-title"><span v-html="check(!!serviceBannerInputValue)"></span> Service Banner</p>
         <p class="form-field-title-description">A full banner that will be shown on the service page, max size 5 megabyte.</p>
         <input type="file" class="form-field-file-input" @change="serviceBannerUpdate" ref="cardbanner" id="service-banner">
         <label for="service-banner" v-html="serviceBannerInputText" class="form-field-file-input-label"></label>
       </div>
       <div class="form-field">
-        <p class="form-field-title">Service Title ({{ 40 - title.length }} Characters Left)</p>
+        <p class="form-field-title"><span v-html="check(title.length > 10, input > 0)"></span> Service Title ({{ 40 - title.length }} Characters Left)</p>
         <p class="form-field-title-description">The title of your service, maximum 45 characters long.</p>
         <input type="text" maxlength="40" v-model="title" class="form-field-text-input" placeholder="Music Translation Service" required>
       </div>
@@ -32,13 +32,14 @@
         <textarea class="form-field-textarea" maxlength="1500" v-model="longDescription"></textarea>
       </div>
       <div class="form-field">
-        <p class="form-field-title">Tiers</p>
-        <p class="form-field-title-description">Tiers are different options you can offer for this service, users can order tiers idividually, each with its own banner, title, description and price.</p>
+        <p class="form-field-title">Tiers ({{ validTiers }} Valid Tier{{ validTiers !== 1 ? "s" : "" }})</p>
+        <p class="form-field-title-description">Tiers are different options you can offer for this service, users can order tiers idividually, each with its own banner, title, description and price. The number of correct & valid tiers will show up - it required to have a title, a description and a banner. Tip: Tiers can cost 0 world locks and be free.</p>
         <div class="tier-wrapper">
           <div class="tier-card" v-for="(tier, index) in tiers" v-bind:key="index">
+            <p class="btn-icon" style="cursor: pointer; position: absolute; top: 1em; right: 0.8em; float: right;" @click="tiers.splice(index, 1)">Delete Tier</p>
             <div class="form-field">
               <p class="form-field-title">Tier Banner</p>
-              <p class="form-field-title-description">The banner that will be shown on the tier, maximum size 4 megabytes.</p>
+              <p class="form-field-title-description">This tier's banner.</p>
               <input type="file" class="form-field-file-input" @change="function (event) { updateTierBanner(event, index); }" v-bind:id="`${index}-tier-banner`">
               <label v-bind:for="`${index}-tier-banner`" v-html="tier.bannerText" class="form-field-file-input-label"></label>
             </div>
@@ -50,19 +51,23 @@
             <div class="form-field">
               <p class="form-field-title">Tier Description ({{ 300 - tier.description.length }} Chars Left)</p>
               <p class="form-field-title-description">A basic description of this tier.</p>
-              <textarea class="form-field-textarea" style="min-height: 80px!important; max-height: 80px!important;" maxlength="300" v-model="tier.description"></textarea>
+              <textarea class="form-field-textarea" style="min-height: 60px!important; max-height: 60px!important;" maxlength="300" v-model="tier.description"></textarea>
             </div>
             <div class="form-field">
-              <p class="form-field-title">Tier Const (in WLs)</p>
+              <p class="form-field-title">Tier Cost (in WLs)</p>
               <p class="form-field-title-description">The cost of this tier in world locks.</p>
               <input type="text" min="0" max="10000" v-model="tier.cost" class="form-field-text-input" placeholder="Amount of world locks." required>
             </div>
-            <p class="btn-icon" style="width: 100%; cursor: pointer;" @click="tiers.splice(index, 1)">Delete Tier</p>
           <div/>
         </div>
-        <div class="tier-card add-tier" style="cursor: pointer;" @click="appendTier">
-          <i class="far fa-plus-square" style="text-align: center; vertical-align: middle; line-height: 658px; font-size: 4em;"></i>
+        <div class="tier-card add-tier" v-if="tiers.length < 4" style="cursor: pointer;" @click="appendTier">
+          <i class="fas fa-plus plus" style="text-align: center; vertical-align: middle; line-height: 497px; font-size: 8em;"></i>
         </div>
+      </div>
+      <div class="form-field">
+        <p class="form-field-title">Keywords ({{ 5 - selectedKeywords.length }} KeyWords Available)</p>
+        <p class="form-field-title-description">Keywords that will promote your service in the GrowLancer search. Maximum 5 of them.</p>
+        <v-select :options="keywords" v-model="selectedKeywords" @input="limitKeywords" multiple></v-select>
       </div>
     </form>
     <Cookie />
@@ -79,6 +84,32 @@ export default {
     Header,
     Cookie
   },
+  computed: {
+    validTiers: function () {
+      const validTiers = [];
+
+      for (const tier of this.tiers) {
+        if (tier.title && tier.description && tier.bannerValue) validTiers.push(tier);
+      }
+
+      return validTiers.length;
+    },
+    creatable: function () {
+      const conditions = [
+        (this.title && this.title.length > 10),
+        (!!this.cardBannerInputValue),
+        (!!this.serviceBannerInputValue),
+        (this.shortDescription && this.shortDescription > 30),
+        (this.longDescription && this.longDescription > 100),
+        (this.validTiers.length > 0),
+        (this.selectedKeywords.length > 2)
+      ];
+
+      console.log(conditions);
+
+      return conditions.some(condition => condition === false) ? false : true;
+    }
+  },
   data () {
     return {
       loaded: false,
@@ -89,10 +120,24 @@ export default {
       serviceBannerInputValue: null,
       longDescription: "",
       shortDescription: "",
-      tiers: [{ title: "", description: "", cost: 0, bannerValue: null, bannerText: "<i class='fas fa-image'></i> Select an image" }]
+      tiers: [{ title: "", description: "", cost: 0, bannerValue: null, bannerText: "<i class='fas fa-image'></i> Select an image" }],
+      keywords: ["Music", "Design", "Composing", "Farming", "Building", "Graphics", "Art", "Carnival", "Harvest", "Commission", "Valentine", "Winter", "Daily", "Quest", "Break", "Gems", "Middleman", "Image", "Video", "Editing", "Halloween", "Free"].map(item => ({ label: item, value: item })),
+      selectedKeywords: []
     }
   },
   methods: {
+    check: function (condition, counterCondition) {
+      if (condition) {
+        return "<span class='green-label'><i class='fas fa-check-circle'></i></span>";
+      } else if (counterCondition) {
+        return "<span class='red-label'><i class='fas fa-times-circle'></i></span>";
+      }
+    },
+    limitKeywords: function (input) {
+      if (input.length > 5) {
+        input.pop();
+      }
+    },
     appendTier: function () {
       this.tiers.push({ title: "", description: "", cost: 0, bannerValue: null, bannerText: "<i class='fas fa-image'></i> Select an image" });
     },
@@ -174,5 +219,13 @@ export default {
 <style>
   .form-field {
     width: 100%;
+  }
+
+  .green-label {
+    color: #30c552;
+  }
+
+  .red-label {
+    color: #dc3545;
   }
 </style>
