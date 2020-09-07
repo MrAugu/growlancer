@@ -2,16 +2,16 @@
   <section>
     <Header v-bind:title="username" />
     <div class="page-loader" v-if="!loaded"><div class="page-pulse"><div></div><div></div><div></div></div></div>
-    <h1 class="head-title-underline" v-if="loaded"><i class="fas fa-info-plus icon"></i> New Service</h1>
+    <h1 class="head-title-underline" v-if="loaded"><i class="fas fa-info-plus icon"></i> Edit Service</h1>
     <form class="form" v-if="loaded">
       <div class="form-field">
-        <p class="form-field-title"><span v-html="check(!!cardBannerInputValue, cardBannerInputText !== `<i class='fas fa-image'></i> Select an image`)"></span> Service Card Banner</p>
+        <p class="form-field-title"><span v-html="check(this.data.cardBanner || !!cardBannerInputValue, cardBannerInputText !== `<i class='fas fa-image'></i> Select an image`)"></span> Service Card Banner</p>
         <p class="form-field-title-description">A smaller banner that will be shown on the service card as a listing, max size 4 megabyte.</p>
         <input type="file" class="form-field-file-input" @change="cardBannerUpdate" ref="cardbanner" id="card-banner">
         <label for="card-banner" v-html="cardBannerInputText" class="form-field-file-input-label"></label>
       </div>
       <div class="form-field">
-        <p class="form-field-title"><span v-html="check(!!serviceBannerInputValue, serviceBannerInputText !== `<i class='fas fa-image'></i> Select an image`)"></span> Service Banner</p>
+        <p class="form-field-title"><span v-html="check(this.data.banner || !!serviceBannerInputValue, serviceBannerInputText !== `<i class='fas fa-image'></i> Select an image`)"></span> Service Banner</p>
         <p class="form-field-title-description">A full banner that will be shown on the service page, max size 5 megabyte.</p>
         <input type="file" class="form-field-file-input" @change="serviceBannerUpdate" ref="cardbanner" id="service-banner">
         <label for="service-banner" v-html="serviceBannerInputText" class="form-field-file-input-label"></label>
@@ -38,7 +38,7 @@
           <div class="tier-card" v-for="(tier, index) in tiers" v-bind:key="index">
             <p class="btn-icon" style="cursor: pointer; position: absolute; top: 1em; right: 0.8em; float: right;" @click="tiers.splice(index, 1)">Delete Tier</p>
             <div class="form-field">
-              <p class="form-field-title"><span v-html="check(!!tier.bannerValue, tier.bannerText !== `<i class='fas fa-image'></i> Select an image`)"></span> Tier Banner</p>
+              <p class="form-field-title"><span v-html="check(tier.banner || !!tier.bannerValue, tier.bannerText !== `<i class='fas fa-image'></i> Select an image`)"></span> Tier Banner</p>
               <p class="form-field-title-description">This tier's banner.</p>
               <input type="file" class="form-field-file-input" @change="function (event) { updateTierBanner(event, index); }" v-bind:id="`${index}-tier-banner`">
               <label v-bind:for="`${index}-tier-banner`" v-html="tier.bannerText" class="form-field-file-input-label"></label>
@@ -69,8 +69,8 @@
         <p class="form-field-title-description">Keywords that will promote your service in the GrowLancer search. Maximum 5 of them.</p>
         <v-select :options="keywords" v-model="selectedKeywords" @input="limitKeywords" multiple></v-select>
       </div>
-      <p class="confirmation-primary" style="display: block; width: 100%; cursor: pointer; text-align: center; margin-top: 1em;" @click="submitService" v-html="saveText"></p>
     </form>
+    <Confirm v-bind:loading="saving" @save="save" @discard="discard" v-if="loaded && changed" />
     <Cookie />
   </section>
 </template>
@@ -78,37 +78,63 @@
 <script>
 import Header from "@/components/Header.vue";
 import Cookie from "@/components/Cookie.vue";
+import Confirm from "@/components/Confirm.vue";
 
 export default {
-  name: "NewService",
+  name: "EditService",
   components: {
     Header,
-    Cookie
+    Cookie,
+    Confirm
   },
   computed: {
     validTiers: function () {
       const validTiers = [];
 
       for (const tier of this.tiers) {
-        if (tier.title.length > 4 && tier.description.length > 49 && !!tier.bannerValue && !isNaN(parseInt(tier.cost)) && parseInt(tier.cost) > -1 && parseInt(tier.cost) < 10001) validTiers.push(tier);
+        if (tier.title.length > 4 && tier.description.length > 49 && (tier.banner || !!tier.bannerValue) && !isNaN(parseInt(tier.cost)) && parseInt(tier.cost) > -1 && parseInt(tier.cost) < 10001) validTiers.push(tier);
       }
 
       return validTiers.length;
     },
-    validTiersObj: function () {
-      const validTiers = [];
+    changed: function () {
+      if (this.title !== this.data.title) return true;
+      if (this.cardBannerInputValue) return true;
+      if (this.serviceBannerInputValue) return true;
+      if (this.shortDescription !== this.data.shortDescription) return true;
+      if (this.longDescription !== this.data.longDescription) return true;
+      if (this.differentKeywords) return true;
+      const validTiers = this.listValidTiers();
+      console.log(validTiers);
+      if (validTiers.length !== this.data.tiers.length) return true;
+      
+      for (var i = 0; i < validTiers.length; i++) {
+        const dataTier = this.data.tiers[i];
+        const liveTier = this.tiers[i];
 
-      for (const tier of this.tiers) {
-        if (tier.title.length > 4 && tier.description.length > 49 && !!tier.bannerValue && !isNaN(parseInt(tier.cost)) && parseInt(tier.cost) > -1 && parseInt(tier.cost) < 10001) validTiers.push(tier);
+        if (dataTier.title != liveTier.title) return true;
+        if (dataTier.banner != liveTier.banner) return true;
+        if (dataTier.description != liveTier.description) return true;
+        if (dataTier.banner && liveTier.bannerValue) return true;
+        if (dataTier.cost != liveTier.cost) return true;
       }
 
-      return validTiers;
+      return false;
+    },
+    differentKeywords: function () {
+      for (const keyword of this.selectedKeywords) {
+        if (!this.data.keywords.includes(keyword.value)) return true;
+      }
+
+      for (const keyword of this.data.keywords) {
+        if (!this.selectedKeywords.map(k => k.value).includes(keyword)) return true;
+      }
+
+      return false;
     },
     creatable: function () {
       const conditions = [
         (this.title.length > 9),
-        (!!this.cardBannerInputValue),
-        (!!this.serviceBannerInputValue),
         (this.shortDescription.length > 29),
         (this.longDescription.length > 99),
         (this.validTiers > 0),
@@ -131,9 +157,10 @@ export default {
     return {
       loaded: false,
       title: "",
-      cardBannerInputText: "<i class='fas fa-image'></i> Select an image",
+      data: {},
+      cardBannerInputText: "<i class='fas fa-image'></i> Update image",
       cardBannerInputValue: null,
-      serviceBannerInputText: "<i class='fas fa-image'></i> Select an image",
+      serviceBannerInputText: "<i class='fas fa-image'></i> Update image",
       serviceBannerInputValue: null,
       longDescription: "",
       shortDescription: "",
@@ -171,14 +198,39 @@ export default {
         "Free"
         ].map(item => ({ label: item, value: item })),
       selectedKeywords: [],
-      submiting: false,
-      buttonText: `<span class="ball-pulse" style="position: relative; top: 0.2em;"><div></div><div></div><div></div></span> Serializing Data`
+      saving: false
     }
   },
   methods: {
-    submitService: async function () {
-      if (!this.creatable) return;
-      this.submiting = true;
+    listValidTiers: function () {
+      const validTiers = [];
+
+      for (const tier of this.tiers) {
+        if (tier.title.length > 4 && tier.description.length > 49 && (tier.banner || !!tier.bannerValue) && !isNaN(parseInt(tier.cost)) && parseInt(tier.cost) > -1 && parseInt(tier.cost) < 10001) validTiers.push(tier);
+      }
+
+      return validTiers;
+    },
+    discard: async function () {
+      this.title = this.data.title;
+      this.shortDescription = this.data.shortDescription;
+      this.longDescription = this.data.longDescription;
+      this.tiers = this.data.tiers.map(tier => ({
+        title: tier.title,
+        description: tier.description,
+        cost: tier.cost,
+        banner: tier.banner,
+        bannerText: `<i class='fas fa-image'></i> Update Image`,
+        bannerValue: null
+      }));
+      this.selectedKeywords = this.data.keywords.map(key => ({ label: key, value: key }));
+      this.cardBannerInputText = "<i class='fas fa-image'></i> Select an image";
+      this.cardBannerInputValue = null;
+      this.serviceBannerInputText = "<i class='fas fa-image'></i> Select an image";
+      this.serviceBannerInputValue = null;
+    },
+    save: async function () {
+      this.loading = true;
 
       const requestBody = {
         "title": this.title,
@@ -190,7 +242,7 @@ export default {
         "serviceBanner": null
       };
 
-      for (const tier of this.validTiersObj) {
+      for (const tier of this.listValidTiers()) {
         const tierObj = {
           "title": tier.title,
           "description": tier.description,
@@ -198,25 +250,54 @@ export default {
           "banner": null
         };
 
-        const tierBanner = await this.fileBase(tier.bannerValue);
-        tierObj["banner"] = tierBanner;
+        if (tier.bannerValue) {
+          const tierBanner = await this.fileBase(tier.bannerValue);
+          tierObj["banner"] = tierBanner;
+        } else {
+          tierObj["banner"] = tier.banner;
+        }
+
         requestBody.tiers.push(tierObj);
       }
-      
-      const cardBanner = await this.fileBase(this.cardBannerInputValue);
-      requestBody["cardBanner"] = cardBanner;
 
-      const serviceBanner = await this.fileBase(this.serviceBannerInputValue);
-      requestBody["serviceBanner"] = serviceBanner;
+      if (this.cardBannerInputValue) {
+        const cardBanner = await this.fileBase(this.cardBannerInputValue);
+        requestBody["cardBanner"] = cardBanner;
+      }
 
-      this.buttonText = `<span class="ball-pulse" style="position: relative; top: 0.2em;"><div></div><div></div><div></div></span> Sending Data`;
+      if (this.serviceBannerInputValue) {
+        const serviceBanner = await this.fileBase(this.serviceBannerInputValue);
+        requestBody["serviceBanner"] = serviceBanner;
+      }
 
-      await this.$axios.post(`${this.$apiBase}/services/new`, requestBody, {
+      await this.$axios.post(`${this.$apiBase}/services/update`, requestBody, {
         withCredentials: true,
         credentials: "same-origin"
       });
+    },
+    loadData: async function () {
+      const locationArray =  window.location.href.split("/");
+      const id = locationArray[locationArray.length - 1];
 
-      // To be done.
+      const serviceData = await this.$axios.get(`${this.$apiBase}/fetch/service/${id}`, {
+        withCredentials: true,
+        credentials: "same-origin"
+      });
+      this.data = serviceData.data.service;
+
+      this.title = this.data.title;
+      this.shortDescription = this.data.shortDescription;
+      this.longDescription = this.data.longDescription;
+      this.tiers = this.data.tiers.map(tier => ({
+        title: tier.title,
+        description: tier.description,
+        cost: tier.cost,
+        banner: tier.banner,
+        bannerText: `<i class='fas fa-image'></i> Update Image`,
+        bannerValue: null
+      }));
+      this.selectedKeywords = this.data.keywords.map(key => ({ label: key, value: key }));
+      this.loaded = true;
     },
     check: function (condition, counterCondition) {
       if (condition) {
@@ -301,9 +382,7 @@ export default {
     }
   },
   mounted () {
-    setTimeout(() => {
-      this.loaded = true;
-    }, 1000);
+    this.loadData();
   }
 }
 </script>

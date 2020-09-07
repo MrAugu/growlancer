@@ -25,6 +25,24 @@ class ApiRoutes {
       }));
     });
 
+    website.app.get("/api/fetch/service/:id", async (request, response) => {
+      const service = await Service.findOne({
+        id: request.params.id
+      });
+
+      response.setHeader("Content-Type", "application/json");
+      if (!service) return response.send(JSON.stringify({
+        error: true,
+        code: 404
+      }));
+
+      response.send(JSON.stringify({
+        error: false,
+        code: 200,
+        service: service
+      }));
+    });
+
     website.app.get("/api/fetch/user/:id", website.authenticate, async (request, response) => {
       const dbUser = await User.findOne({
         id: parseInt(request.params.id, 10)
