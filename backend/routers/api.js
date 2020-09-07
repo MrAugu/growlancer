@@ -2,6 +2,10 @@ const User = require("../models/user");
 const Avatar = require("../models/avatar");
 const crypto = require("crypto");
 const Banner = require("../models/banner");
+const TierBanner = require("../models/tierBanner");
+const ServiceBanner = require("../models/serviceBanner");
+const CardBanner = require("../models/cardBanner");
+const Service = require("../models/service");
 
 class ApiRoutes {
   constructor (website) {
@@ -63,49 +67,17 @@ class ApiRoutes {
       var banner = request.body.banner || null;
 
       if (avatar) {
-        const [meta, content] = avatar.split(",");
-        if (meta && content) {
-          const type = meta.split(":")[1]?.split(";")[0];
-          const hash = crypto.createHash("sha1")
-            .update(content)
-            .digest("hex");
-          const newAvatar = new Avatar({
-            type: type,
-            hash: hash,
-            for: user.id,
-            content: content
-          });
-          await Avatar.deleteMany({
-            for: user.id
-          }).catch(()=>{});
-          await newAvatar.save().catch(()=>{});
-          avatar = hash;
-        } else {
-          avatar = null;
-        }
+        await Avatar.deleteMany({
+          for: user.id
+        }).catch(()=>{});
+        avatar = await uploadFile(Avatar, avatar, user.id);
       }
 
       if (banner) {
-        const [meta, content] = banner.split(",");
-        if (meta && content) {
-          const type = meta.split(":")[1]?.split(";")[0];
-          const hash = crypto.createHash("sha1")
-            .update(content)
-            .digest("hex");
-          const newBanner = new Banner({
-            type: type,
-            hash: hash,
-            for: user.id,
-            content: content
-          });
-          await Banner.deleteMany({
-            for: user.id
-          }).catch(()=>{});
-          await newBanner.save().catch(()=>{});
-          banner = hash;
-        } else {
-          banner = null;
-        }
+        await Banner.deleteMany({
+          for: user.id
+        }).catch(()=>{});
+        banner = await uploadFile(Banner, banner, user.id);
       }
 
       user.bio = bio.trim().slice(0, 100);
@@ -122,7 +94,113 @@ class ApiRoutes {
         avatar: avatar ? true : false
       }));
     });
+
+    website.app.post("/api/services/new", website.authenticate, async (request, response) => {
+      var title = request.body.title || null;
+      var shortDescription = request.body.shortDescription || null;
+      var longDescription = request.body.longDescription || null;
+      var cardBanner = request.body.cardBanner || null;
+      var serviceBanner = request.body.serviceBanner || null;
+      var tiers = request.body.tiers || null;
+      var keywords = request.body.keywords || null;
+
+      tiers = tiers.filter(tier => tier.title && tier.description && tier.banner && !isNaN(tier.cost));
+
+      const showBadRequest = [
+        !title,
+        !shortDescription,
+        !longDescription,
+        !cardBanner,
+        !serviceBanner,
+        !tiers || !tiers.length,
+        title.length > 40,
+        title.length < 10,
+        tiers.length > 4,
+        shortDescription.length > 120,
+        shortDescription.length < 30,
+        longDescription.length > 1000,
+        longDescription.length < 100,
+        keywords.length > 5,
+        keywords.length < 2
+      ].some(c => c === true);
+
+      if (showBadRequest) return response.send(JSON.stringify({
+        error: true,
+        code: 400
+      }));
+
+      const serviceID = Date.now().toString(36);
+
+      const promiseArray = [
+        uploadFile(ServiceBanner, serviceBanner, serviceID),
+        uploadFile(CardBanner, cardBanner, serviceID)
+      ];
+
+      for (const tier of tiers) {
+        promiseArray.push(uploadFile(TierBanner, tier.banner, serviceID));
+      }
+
+      var fileUploads;
+  
+      try {
+        fileUploads = await Promise.all(promiseArray);
+      } catch (e) {
+        return response.send(JSON.stringify({
+          error: true,
+          code: 400
+        }));
+      }
+
+      serviceBanner = fileUploads[0];
+      cardBanner = fileUploads[1];
+
+      for (var i = 2; i < fileUploads.length; i++) {
+        tiers[i - 2].banner = fileUploads[i];
+      }
+
+      const newService = new Service({
+        id: serviceID,
+        owner: request.user.id,
+        title: title,
+        shortDescription: shortDescription,
+        longDescription: longDescription,
+        banner: serviceBanner,
+        cardBanner: cardBanner,
+        tiers: tiers,
+        created: Date.now(),
+        keywords: keywords
+      });
+
+      await newService.save().catch(()=>{});
+
+      return response.send(JSON.stringify({
+        error: false,
+        code: 200,
+        serviceID: serviceID,
+        banner: serviceBanner,
+        cardBanner: cardBanner,
+        tierBanners: tiers.map(t => t.banner),
+        owner: request.user.id,
+        created: Date.now()
+      }));
+    });
   }
 }
 
 module.exports = ApiRoutes;
+
+async function uploadFile (Model, file, who) {
+  const [meta, content] = file.split(",");
+  const type = meta.split(":")[1]?.split(";")[0];
+  const hash = crypto.createHash("sha1")
+    .update(content)
+    .digest("hex");
+  const dbFile = new Model({
+    type: type,
+    hash: hash,
+    for: who,
+    content: content
+  });
+  await dbFile.save();
+  return hash;
+}

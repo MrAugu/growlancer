@@ -43,6 +43,16 @@ class Website {
     this.log("- Loading up middlewares...");
     this.app.set("view engine", "html");
 
+
+    this.log("Loading body-parser.");
+    this.app.use(bodyParser.json({
+      limit: "30mb"
+    }));
+    this.app.use(bodyParser.urlencoded({
+      extended: true
+    }));
+    
+
     this.log("Loading mongodb session store.");
     this.app.use(session({
       store: new MongoStore({
@@ -68,12 +78,6 @@ class Website {
     this.log("Loading helmet.");
     this.app.use(helmet());
 
-    this.log("Loading body-parser.");
-    this.app.use(bodyParser.json());
-    this.app.use(bodyParser.urlencoded({
-      extended: true
-    }));
-    
     this.log("Middlewares loaded.");
   }
   

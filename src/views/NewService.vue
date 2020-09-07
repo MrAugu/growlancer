@@ -95,6 +95,15 @@ export default {
 
       return validTiers.length;
     },
+    validTiersObj: function () {
+      const validTiers = [];
+
+      for (const tier of this.tiers) {
+        if (tier.title.length > 4 && tier.description.length > 49 && !!tier.bannerValue && !isNaN(parseInt(tier.cost)) && parseInt(tier.cost) > -1 && parseInt(tier.cost) < 10001) validTiers.push(tier);
+      }
+
+      return validTiers;
+    },
     creatable: function () {
       const conditions = [
         (this.title.length > 9),
@@ -105,12 +114,13 @@ export default {
         (this.validTiers > 0),
         (this.selectedKeywords.length > 1)
       ];
-      console.log(conditions);
 
       return conditions.some(condition => condition === false) ? false : true;
     },
     saveText: function () {
-      if (this.creatable) {
+      if (this.submiting) {
+        return this.buttonText;
+      } else if (this.creatable) {
         return "<i class='fas fa-check'></i> Create Service";
       } else {
         return "<i class='fas fa-lock'></i> Create Service";
@@ -127,15 +137,88 @@ export default {
       serviceBannerInputValue: null,
       longDescription: "",
       shortDescription: "",
-      tiers: [{ title: "", description: "", cost: 0, bannerValue: null, bannerText: "<i class='fas fa-image'></i> Select an image" }],
-      keywords: ["Music", "Design", "Composing", "Farming", "Building", "Graphics", "Art", "Carnival", "Harvest", "Commission", "Valentine", "Winter", "Daily", "Quest", "Break", "Gems", "Middleman", "Image", "Video", "Editing", "Halloween", "Free"].map(item => ({ label: item, value: item })),
-      selectedKeywords: []
+      tiers: [
+        {
+          title: "",
+          description: "",
+          cost: 0,
+          bannerValue: null,
+          bannerText: "<i class='fas fa-image'></i> Select an image"
+        }
+      ],
+      keywords: [
+        "Music",
+        "Design",
+        "Composing",
+        "Farming",
+        "Building",
+        "Graphics",
+        "Art",
+        "Carnival",
+        "Harvest",
+        "Commission",
+        "Valentine",
+        "Winter",
+        "Daily",
+        "Quest",
+        "Break",
+        "Gems",
+        "Middleman",
+        "Image",
+        "Video",
+        "Editing",
+        "Halloween",
+        "Free"
+        ].map(item => ({ label: item, value: item })),
+      selectedKeywords: [],
+      submiting: false,
+      buttonText: `<span class="ball-pulse" style="position: relative; top: 0.2em;"><div></div><div></div><div></div></span> Serializing Data`
     }
   },
   methods: {
-    submitService: function () {
+    submitService: async function () {
       if (!this.creatable) return;
-      console.log("Creating...");
+      this.submiting = true;
+
+      const requestBody = {
+        "title": this.title,
+        "shortDescription": this.shortDescription,
+        "longDescription": this.longDescription,
+        "keywords": this.selectedKeywords.map(selected => selected.value),
+        "tiers": [],
+        "cardBanner": null,
+        "serviceBanner": null
+      };
+
+      for (const tier of this.validTiersObj) {
+        const tierObj = {
+          "title": tier.title,
+          "description": tier.description,
+          "cost": parseInt(tier.cost),
+          "banner": null
+        };
+
+        const tierBanner = await this.fileBase(tier.bannerValue);
+        tierObj["banner"] = tierBanner;
+        requestBody.tiers.push(tierObj);
+      }
+      
+      const cardBanner = await this.fileBase(this.cardBannerInputValue);
+      requestBody["cardBanner"] = cardBanner;
+
+      const serviceBanner = await this.fileBase(this.serviceBannerInputValue);
+      requestBody["serviceBanner"] = serviceBanner;
+
+      console.log(requestBody);
+
+      this.buttonText = `<span class="ball-pulse" style="position: relative; top: 0.2em;"><div></div><div></div><div></div></span> Sending Data`;
+
+      const saveResponse = await this.$axios.post(`${this.$apiBase}/services/new`, requestBody, {
+        withCredentials: true,
+        credentials: "same-origin"
+      });
+
+      console.log(saveResponse.data);
     },
     check: function (condition, counterCondition) {
       if (condition) {
