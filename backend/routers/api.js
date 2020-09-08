@@ -244,8 +244,19 @@ class ApiRoutes {
         code: 400
       }));
 
-      if (cardBanner) cardBanner = await uploadFile(CardBanner, cardBanner, service.id);
-      if (serviceBanner) serviceBanner = await uploadFile(ServiceBanner, serviceBanner, service.id);
+      if (cardBanner) {
+        cardBanner = await uploadFile(CardBanner, cardBanner, service.id);
+        await CardBanner.findOneAndDelete({
+          hash: service.cardBanner
+        }).catch(()=>{});
+      }
+
+      if (serviceBanner) {
+        serviceBanner = await uploadFile(ServiceBanner, serviceBanner, service.id);
+        await ServiceBanner.findOneAndDelete({
+          hash: service.banner
+        }).catch(()=>{});
+      }
 
       const parsedTiers = [];
 
