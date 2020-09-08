@@ -202,6 +202,103 @@ class ApiRoutes {
         created: Date.now()
       }));
     });
+
+    website.app.post("/api/services/update/:id", website.authenticate, async (request, response) => {
+      const service = await Service.findOne({
+        id: request.params.id
+      });
+
+      if (!service) return response.send(JSON.stringify({
+        error: true,
+        code: 404
+      }));
+
+      var title = request.body.title || null;
+      var shortDescription = request.body.shortDescription || null;
+      var longDescription = request.body.longDescription || null;
+      var cardBanner = request.body.cardBanner || null;
+      var serviceBanner = request.body.serviceBanner || null;
+      var tiers = request.body.tiers || null;
+      var keywords = request.body.keywords || null;
+
+      tiers = tiers.filter(tier => tier.title && tier.description && tier.banner && !isNaN(tier.cost));
+
+      const showBadRequest = [
+        !title,
+        !shortDescription,
+        !longDescription,
+        !tiers || !tiers.length,
+        title.length > 40,
+        title.length < 10,
+        tiers.length > 4,
+        shortDescription.length > 120,
+        shortDescription.length < 30,
+        longDescription.length > 1000,
+        longDescription.length < 100,
+        keywords.length > 5,
+        keywords.length < 2
+      ].some(c => c === true);
+
+      if (showBadRequest) return response.send(JSON.stringify({
+        error: true,
+        code: 400
+      }));
+
+      if (cardBanner) cardBanner = await uploadFile(CardBanner, cardBanner, service.id);
+      if (serviceBanner) serviceBanner = await uploadFile(ServiceBanner, serviceBanner, service.id);
+
+      const parsedTiers = [];
+
+      var tierAssets = await TierBanner.find({
+        for: service.id
+      });
+      tierAssets = tierAssets.map(tier => tier.hash);
+
+      for (const tier of tiers) {
+        var banner;
+        if (tier.banner.split(";").length > 1) {
+          banner = await uploadFile(TierBanner, tier.banner, service.id);
+        } else {
+          banner = tier.banner;
+        }
+
+        if (tierAssets.includes(banner)) {
+          const indx = tierAssets.findIndex(asset => asset === banner);
+          tierAssets.splice(indx, 1);
+        }
+
+        const tierObj = {
+          "title": tier.title.slice(0, 40),
+          "description": tier.description.slice(0, 300),
+          "cost": tier.cost,
+          "banner": banner
+        };
+
+        parsedTiers.push(tierObj);
+      }
+
+      for (const tierAsset of tierAssets) {
+        console.log(tierAsset);
+        await TierBanner.findOneAndDelete({
+          hash: tierAsset
+        }).catch(() => {});
+      }
+
+      service.title = title;
+      service.shortDescription = shortDescription;
+      service.longDescription = longDescription;
+      if (cardBanner) service.cardBanner = cardBanner;
+      if (serviceBanner) service.banner = serviceBanner;
+      service.keywords = keywords;
+      service.tiers = parsedTiers;
+
+      await service.save().catch(()=>{});
+
+      return response.send(JSON.stringify({
+        code: 200,
+        error: false
+      }));
+    });
   }
 }
 

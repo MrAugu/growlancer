@@ -270,10 +270,14 @@ export default {
         requestBody["serviceBanner"] = serviceBanner;
       }
 
-      await this.$axios.post(`${this.$apiBase}/services/update`, requestBody, {
+      const x = await this.$axios.post(`${this.$apiBase}/services/update/${this.data.id}`, requestBody, {
         withCredentials: true,
         credentials: "same-origin"
       });
+
+      console.log(x.data);
+
+      this.loadData();
     },
     loadData: async function () {
       const locationArray =  window.location.href.split("/");
