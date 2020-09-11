@@ -1309,14 +1309,24 @@ export default {
     font-size: 1em;
     margin-top: .7em;
     width: 100%;
+    height: 80px;
+    line-height: 80px;
     overflow: hidden;
     text-align: center;
+  }
+
+  .service-description-content {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: normal;
   }
 
   .star-wrap {
     color: #ffc039;
     font-size: 1.6em;
     margin-top: .2em;
+    position: absolute;
+    top: 14.08em;
   }
 
   .service-owner {
@@ -1348,5 +1358,30 @@ export default {
   .small {
     color: #fff;
     font-size: .65em;
+  }
+
+  .service-range-icon {
+    color: #ffbc46;
+    position: absolute;
+    font-size: 1.7em;
+    top: 16.15em;
+    right: 1.1em;
+  }
+
+  .service-range {
+    text-align: right;
+    position: fixed;
+    font-size: 1em;
+    top: 27.6em;
+    right: 4em;
+  }
+
+  .service-range-text {
+    text-align: right;
+    position: fixed;
+    font-size: .8em;
+    top: 35.85em;
+    color: #e9c881;
+    right: 5em;
   }
 </style>

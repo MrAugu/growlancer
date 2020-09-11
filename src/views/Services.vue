@@ -12,13 +12,16 @@
             <img class="service-card-banner" v-bind:src="`${baseUrl}/cdn/card/banner/${service.cardBanner}`">
             <h3 class="service-title">{{ service.title }}</h3>
             <p class="service-keywords">{{ service.keywords.join(", ") }}</p>
-            <div class="service-description">{{ service.shortDescription }}</div>
+            <div class="service-description"><p class="service-description-content">{{ service.shortDescription }}</p></div>
             <div class="star-wrap">{{ "★".repeat(Math.floor(service.rating)) }}{{ "☆".repeat(5 - Math.floor(service.rating)) }} {{ service.rating.toFixed(1) }} <span class="small">({{ service.rates.length }} Ratings)</span></div>
             <div class="service-owner">
               <img v-bind:src="`${baseUrl}/cdn/avatars/${data.owner.avatar}`" alt="serviceowner.png" class="owner-avatar">
               <p class="owner-name">{{ data.owner.username }}</p>
               <p class="owner-join">{{ joinTime(data.owner.joined) }}</p>
             </div>
+            <p class="service-range">{{ (Math.min(...service.tiers.map(t => t.cost))).toLocaleString() }} - {{ (Math.max(...service.tiers.map(t => t.cost))).toLocaleString() }}</p>
+            <p class="service-range-text">World Locks</p>
+            <p class="service-range-icon"><i class="fas fa-lock"></i></p>
           </div>
         </div>
       </div>
