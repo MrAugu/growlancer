@@ -31,6 +31,11 @@ Vue.use(VueRouter)
     component: () => import("../views/NewService.vue")
   },
   {
+    path: "/services",
+    name: "Services",
+    component: () => import("../views/Services.vue")
+  },
+  {
     path: "*",
     name: "Error",
     component: () => import("../views/Error.vue")

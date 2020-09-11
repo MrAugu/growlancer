@@ -925,6 +925,15 @@ export default {
     transition: 0.5s;
   }
 
+  .service-wrapper {
+    text-align: center;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    flex-direction: column;
+    transition: 0.5s;
+  }
+
   .tier-card {
     position: relative;
     overflow: hidden;
@@ -939,6 +948,28 @@ export default {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    margin: 1em;
+    word-break: break-word!important;
+    transition: 0.5s;
+    -webkit-box-shadow: 10px 10px 16px -5px rgba(0, 0, 0, 0.46);
+    -moz-box-shadow: 10px 10px 16px -5px rgba(0, 0, 0, 0.46);
+    box-shadow: 10px 10px 16px -5px rgba(0, 0, 0, 0.46);
+    transform: translateY(150px);
+    opacity: 0;
+    animation: come-in 0.6s ease forwards;
+  }
+
+  .service-card {
+    position: relative;
+    overflow: hidden;
+    padding: 1em 1em 0 1em;
+    width: 375px;
+    background-color: #26212c;
+    height: 500px;
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin: 1em;
     word-break: break-word!important;
     transition: 0.5s;
@@ -1029,6 +1060,13 @@ export default {
     }
 
     .tier-wrapper {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .service-wrapper {
       flex-direction: row;
       flex-wrap: wrap;
       justify-content: center;
@@ -1241,5 +1279,74 @@ export default {
 
   .add-tier:hover {
     color: rgb(170, 170, 170);
+  }
+
+  .service-section-title {
+    font-size: 1.5em;
+    display: block;
+  }
+
+  .link {
+    text-decoration: none;
+    color: #446fff;
+  }
+
+  .service-card-banner {
+    width: 400px;
+    height: 200px;
+    display: block;
+    position: relative;
+    top: -15px;
+    box-shadow: 10px 10px 16px -5px rgba(0, 0, 0, 0.46);
+  }
+
+  .service-keywords {
+    color: #949494;
+    font-size: .9em;
+  }
+
+  .service-description {
+    font-size: 1em;
+    margin-top: .7em;
+    width: 100%;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .star-wrap {
+    color: #ffc039;
+    font-size: 1.6em;
+    margin-top: .2em;
+  }
+
+  .service-owner {
+    float: left;
+  }
+
+  .service-owner .owner-avatar {
+    position: absolute;
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    top: 27.3em;
+    left: 1em;
+  }
+
+  .service-owner .owner-name {
+    position: absolute;
+    top: 30.5em;
+    left: 5.5em;
+    font-weight: bold;
+  }
+
+  .service-owner .owner-join {
+    position: absolute;
+    top: 32em;
+    left: 5.5em;
+  }
+
+  .small {
+    color: #fff;
+    font-size: .65em;
   }
 </style>

@@ -31,6 +31,10 @@ const serviceSchema = new Schema({
   },
   visible: {
     type: Boolean,
+    default: true
+  },
+  approved: {
+    type: Boolean,
     default: false
   },
   moderator: {
@@ -57,6 +61,14 @@ const serviceSchema = new Schema({
   downvotes: {
     type: Array,
     default: []
+  },
+  rates: {
+    type: Array,
+    default: []
+  },
+  rating: {
+    type: Number,
+    default: 0
   }
 });
 

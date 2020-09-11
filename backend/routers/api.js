@@ -289,7 +289,6 @@ class ApiRoutes {
       }
 
       for (const tierAsset of tierAssets) {
-        console.log(tierAsset);
         await TierBanner.findOneAndDelete({
           hash: tierAsset
         }).catch(() => {});
@@ -308,6 +307,42 @@ class ApiRoutes {
       return response.send(JSON.stringify({
         code: 200,
         error: false
+      }));
+    });
+
+    website.app.get("/api/fetch/services/user/:id", website.authenticate, async (request, response) => {
+      const dbUser = await User.findOne({
+        id: parseInt(request.params.id, 10)
+      });
+
+      response.setHeader("Content-Type", "application/json");
+
+      if (!dbUser) return response.status(200).send(JSON.stringify({
+        exists: false,
+        code: 404,
+        user: {}
+      }));
+
+      var userServices = await Service.find({
+        owner: dbUser.id
+      });
+
+      return response.send(JSON.stringify({
+        error: false,
+        code: 200,
+        exists: true,
+        services: {
+          unapproved: userServices.filter(service => !service.approved),
+          visible: userServices.filter(service => service.approved && service.visible),
+          invisible: userServices.filter(service => !service.visible && service.approved),
+          owner: {
+            username: dbUser.username,
+            id: dbUser.id,
+            verified: dbUser.verified,
+            avatar: dbUser.avatar,
+            joined: dbUser.joined
+          }
+        },
       }));
     });
   }
